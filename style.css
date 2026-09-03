@@ -65,15 +65,19 @@ body {
 .brand-logo {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
   color: #ffffff;
   font-weight: 700;
-  font-size: 1.2rem;
+  font-size: 1.25rem;
 }
 
-.glow-icon {
-  color: var(--primary-pink);
-  filter: drop-shadow(0 0 8px var(--primary-pink));
+.brand-svg-logo {
+  filter: drop-shadow(0 0 10px rgba(244, 151, 169, 0.6));
+  transition: transform 0.3s ease;
+}
+
+.brand-logo:hover .brand-svg-logo {
+  transform: scale(1.1) rotate(-5deg);
 }
 
 .nav-admin-btn {

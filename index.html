@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Know Me ☁️</title>
+  <link rel="stylesheet" href="style.css">
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+</head>
+<body>
+
+  <!-- Dynamic Backgrounds -->
+  <div class="bg-wallpaper"></div>
+  <div class="bg-glow"></div>
+
+  <!-- Top Navigation Bar -->
+  <nav class="top-nav">
+    <div class="brand-logo">
+      <i data-lucide="sparkles" class="glow-icon"></i>
+      <span>Know Me</span>
+    </div>
+    <button id="admin-trigger-btn" class="nav-admin-btn">
+      <i data-lucide="lock"></i>
+      <span>Admin</span>
+    </button>
+  </nav>
+
+  <!-- Main Viewport -->
+  <div class="app-viewport">
+    
+    <!-- QUESTIONNAIRE FLOW -->
+    <div id="user-flow" class="flow-container">
+      
+      <!-- Progress Bar -->
+      <div class="progress-bar-container">
+        <div id="progress-fill" class="progress-fill"></div>
+      </div>
+
+      <form id="quiz-form" onsubmit="return false;">
+        <div id="slides-wrapper" class="slides-wrapper">
+          
+          <!-- Slide 0: Profile Info & Photo Upload -->
+          <div class="slide active-slide" data-slide="0">
+            <div class="cozy-card card-slide">
+              <div class="card-tag">STEP 01</div>
+              <h2>Welcome! Let's get to know you 🌸</h2>
+              <p class="subtitle">Tell me a bit about yourself before we begin.</p>
+              
+              <div class="input-group">
+                <label for="user-name"><i data-lucide="user"></i> Your Name</label>
+                <input type="text" id="user-name" placeholder="What should I call you?">
+              </div>
+
+              <div class="input-row">
+                <div class="input-group">
+                  <label for="user-age"><i data-lucide="smile"></i> Age</label>
+                  <input type="number" id="user-age" placeholder="18">
+                </div>
+                <div class="input-group">
+                  <label for="user-bday"><i data-lucide="cake"></i> Birthday</label>
+                  <input type="date" id="user-bday">
+                </div>
+              </div>
+
+              <div class="input-group">
+                <label for="user-photo"><i data-lucide="image"></i> Pick Your Favorite Photo</label>
+                <div class="photo-upload-box">
+                  <input type="file" id="user-photo" accept="image/*">
+                  <div id="photo-preview-container" class="photo-preview-container">
+                    <i data-lucide="upload-cloud"></i>
+                    <span>Click to upload photo</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Question slides injected dynamically via JS -->
+
+        </div>
+
+        <!-- Navigation Controls -->
+        <div class="controls-bar">
+          <button type="button" id="prev-btn" class="control-btn hidden">
+            <i data-lucide="arrow-left"></i> Back
+          </button>
+          <div id="slide-counter" class="slide-counter">1 / 37</div>
+          <button type="button" id="next-btn" class="control-btn primary-glow">
+            Next <i data-lucide="arrow-right"></i>
+          </button>
+          <button type="button" id="submit-btn" class="control-btn primary-glow hidden">
+            Submit Answers <i data-lucide="check"></i>
+          </button>
+        </div>
+      </form>
+
+    </div>
+
+    <!-- ADMIN PANEL DASHBOARD PAGE -->
+    <div id="admin-view" class="flow-container hidden">
+      
+      <!-- Password Screen -->
+      <div id="admin-auth-screen" class="cozy-card auth-card slide-fade-in">
+        <i data-lucide="shield-check" class="auth-icon"></i>
+        <h2>Secret Passport Verification</h2>
+        <p class="subtitle">Enter the master code to access saved cards</p>
+        <div class="input-group">
+          <input type="password" id="admin-pass-input" placeholder="Enter password...">
+        </div>
+        <button id="admin-login-btn" class="cozy-btn">Unlock Dashboard</button>
+        <p id="admin-err-msg" class="error-msg hidden">Incorrect code! Try again 🌸</p>
+      </div>
+
+      <!-- Dashboard View -->
+      <div id="admin-dashboard-screen" class="hidden slide-fade-in">
+        <div class="dash-top-bar">
+          <button id="exit-admin-btn" class="cozy-btn-outline">
+            <i data-lucide="arrow-left"></i> Exit Admin
+          </button>
+          <h2><i data-lucide="book-open"></i> Collected Passports</h2>
+        </div>
+
+        <!-- Friends Grid -->
+        <div id="friends-list-grid" class="friends-grid">
+          <!-- Passport Cards Rendered Here -->
+        </div>
+
+        <!-- Detail Modal View -->
+        <div id="friend-detail-modal" class="modal hidden">
+          <div class="modal-backdrop" onclick="closeDetailModal()"></div>
+          <div class="passport-modal-content">
+            <div id="passport-card-render"></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- SUBMISSION SUCCESS BLUR MODAL -->
+  <div id="success-modal" class="modal hidden">
+    <div class="modal-backdrop" onclick="closeSuccessModal()"></div>
+    <div class="cozy-card completion-card modal-pop-in">
+      <button class="modal-x-btn" onclick="closeSuccessModal()">&times;</button>
+      <div class="sparkle-icon-wrap">
+        <i data-lucide="heart" class="heart-pulse"></i>
+      </div>
+      <h2>Saved to My Heart! ✨</h2>
+      <p class="subtitle">Your responses have been uploaded successfully.</p>
+      <button onclick="resetAppView()" class="cozy-btn-outline dark-btn">Fill Out Again</button>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

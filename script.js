@@ -70,7 +70,7 @@ questionsData.forEach((item, idx) => {
   ).join("");
 
   slide.innerHTML = `
-    <div class="cozy-card card-slide">
+    <div class="cozy-card card-slide floating-card">
       <div class="card-tag">QUESTION ${String(idx + 1).padStart(2, '0')}</div>
       <h2>${item.q}</h2>
       <p class="subtitle">Pick a suggestion or type your own response below!</p>

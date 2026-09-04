@@ -11,6 +11,7 @@
 </head>
 <body>
 
+  <div class="custom-bg-layer"></div>
   <div class="bg-wallpaper"></div>
   <div class="bg-glow"></div>
 
@@ -52,7 +53,7 @@
         <div id="slides-wrapper" class="slides-wrapper">
           
           <div class="slide active-slide" data-slide="0">
-            <div class="cozy-card card-slide">
+            <div class="cozy-card card-slide floating-card">
               <div class="card-tag">STEP 01</div>
               <h2>Welcome! Let's get to know you 🌸</h2>
               <p class="subtitle">Tell me a bit about yourself before we begin.</p>
@@ -106,7 +107,7 @@
 
     <div id="admin-view" class="flow-container hidden">
       
-      <div id="admin-auth-screen" class="cozy-card auth-card slide-fade-in">
+      <div id="admin-auth-screen" class="cozy-card auth-card slide-fade-in floating-card">
         <i data-lucide="shield-check" class="auth-icon"></i>
         <h2>Secret Passport Verification</h2>
         <p class="subtitle">Enter the master code to access saved cards</p>
@@ -152,7 +153,7 @@
 
   <div id="success-modal" class="modal hidden">
     <div class="modal-backdrop" onclick="closeSuccessModal()"></div>
-    <div class="cozy-card completion-card modal-pop-in">
+    <div class="cozy-card completion-card modal-pop-in floating-card">
       <button class="modal-x-btn" onclick="closeSuccessModal()">&times;</button>
       <div class="sparkle-icon-wrap">
         <i data-lucide="heart" class="heart-pulse"></i>

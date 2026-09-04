@@ -5,22 +5,17 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Know Me ☁️</title>
   <link rel="stylesheet" href="style.css">
-  <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
-  <!-- Firebase SDKs -->
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
 </head>
 <body>
 
-  <!-- Dynamic Backgrounds -->
   <div class="bg-wallpaper"></div>
   <div class="bg-glow"></div>
 
-  <!-- Top Navigation Bar -->
   <nav class="top-nav">
     <div class="brand-logo">
-      <!-- Option 1: Floating Cloud & Sparkles SVG Logo -->
       <svg class="brand-svg-logo" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="36" height="36">
         <defs>
           <linearGradient id="cloudGlow" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -45,13 +40,10 @@
     </button>
   </nav>
 
-  <!-- Main Viewport -->
   <div class="app-viewport">
     
-    <!-- QUESTIONNAIRE FLOW -->
     <div id="user-flow" class="flow-container">
       
-      <!-- Progress Bar -->
       <div class="progress-bar-container">
         <div id="progress-fill" class="progress-fill"></div>
       </div>
@@ -59,7 +51,6 @@
       <form id="quiz-form" onsubmit="return false;">
         <div id="slides-wrapper" class="slides-wrapper">
           
-          <!-- Slide 0: Profile Info & Photo Upload -->
           <div class="slide active-slide" data-slide="0">
             <div class="cozy-card card-slide">
               <div class="card-tag">STEP 01</div>
@@ -95,11 +86,8 @@
             </div>
           </div>
 
-          <!-- Question slides injected dynamically via JS -->
+          </div>
 
-        </div>
-
-        <!-- Navigation Controls -->
         <div class="controls-bar">
           <button type="button" id="prev-btn" class="control-btn hidden">
             <i data-lucide="arrow-left"></i> Back
@@ -116,10 +104,8 @@
 
     </div>
 
-    <!-- ADMIN PANEL DASHBOARD PAGE -->
     <div id="admin-view" class="flow-container hidden">
       
-      <!-- Password Screen -->
       <div id="admin-auth-screen" class="cozy-card auth-card slide-fade-in">
         <i data-lucide="shield-check" class="auth-icon"></i>
         <h2>Secret Passport Verification</h2>
@@ -131,21 +117,27 @@
         <p id="admin-err-msg" class="error-msg hidden">Incorrect code! Try again 🌸</p>
       </div>
 
-      <!-- Dashboard View -->
       <div id="admin-dashboard-screen" class="hidden slide-fade-in">
         <div class="dash-top-bar">
           <button id="exit-admin-btn" class="cozy-btn-outline">
-            <i data-lucide="arrow-left"></i> Exit Admin
+            <i data-lucide="arrow-left"></i> Exit
           </button>
-          <h2><i data-lucide="book-open"></i> Collected Passports</h2>
+          <h2><i data-lucide="book-open"></i> Passports</h2>
+          <button id="delete-selected-btn" class="delete-all-btn">
+            <i data-lucide="trash-2"></i> Delete Selected (<span id="select-count">0</span>)
+          </button>
         </div>
 
-        <!-- Friends Grid -->
+        <div class="select-bar">
+          <label class="select-all-label">
+            <input type="checkbox" id="select-all-checkbox">
+            <span>Select All</span>
+          </label>
+        </div>
+
         <div id="friends-list-grid" class="friends-grid">
-          <!-- Passport Cards Rendered Here -->
-        </div>
+          </div>
 
-        <!-- Detail Modal View -->
         <div id="friend-detail-modal" class="modal hidden">
           <div class="modal-backdrop" onclick="closeDetailModal()"></div>
           <div class="passport-modal-content">
@@ -158,7 +150,6 @@
 
   </div>
 
-  <!-- SUBMISSION SUCCESS BLUR MODAL -->
   <div id="success-modal" class="modal hidden">
     <div class="modal-backdrop" onclick="closeSuccessModal()"></div>
     <div class="cozy-card completion-card modal-pop-in">

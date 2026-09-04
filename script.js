@@ -13,9 +13,8 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
-// 36 Deduplicated Custom Questions Data
+// Questions Data
 const questionsData = [
-  // Original List
   { q: "What is your absolute comfort food?", choices: ["Ramen 🍜", "Pizza 🍕", "Ice Cream 🍦"] },
   { q: "Favorite song type for rainy days?", choices: ["Lo-Fi Beats 🎧", "Acoustic Pop 🎸", "Classical 🎻"] },
   { q: "What instantly brightens your day?", choices: ["Warm tea ☕", "A nice compliment ✨", "Cute pets 🐱"] },
@@ -42,8 +41,6 @@ const questionsData = [
   { q: "What popular thing do you dislike?", choices: ["Crowded parties 🔊", "Trendy fashion 👗", "Waking up early ⏰"] },
   { q: "What is your go-to pizza topping?", choices: ["Extra Cheese 🧀", "Pepperoni 🍕", "Mushrooms 🍄"] },
   { q: "What is your favorite cozy memory with me?", choices: ["Our long talks 💬", "Laughing together 🤣", "Exploring places 🗺️"] },
-
-  // Newly Added Unique Questions
   { q: "Which animals do you love?", choices: ["Cats & Dogs 🐱🐶", "Wild Animals 🦁", "Pandas & Bears 🐼"] },
   { q: "What is your favorite style of clothing?", choices: ["Streetwear 🧢", "Casual Cozy 🧸", "E-Girl / Goth 🖤"] },
   { q: "What do you hate the most?", choices: ["Fake People 😒", "Lies 🚫", "Bad Food 🤮"] },
@@ -58,6 +55,7 @@ const questionsData = [
 
 let currentSlideIndex = 0;
 let uploadedPhotoBase64 = "";
+let selectedDocIds = new Set();
 
 // Inject Question Cards
 const slidesWrapper = document.getElementById("slides-wrapper");
@@ -219,6 +217,9 @@ const adminPassInput = document.getElementById("admin-pass-input");
 const adminErrMsg = document.getElementById("admin-err-msg");
 const adminAuthScreen = document.getElementById("admin-auth-screen");
 const adminDashboardScreen = document.getElementById("admin-dashboard-screen");
+const deleteSelectedBtn = document.getElementById("delete-selected-btn");
+const selectAllCheckbox = document.getElementById("select-all-checkbox");
+const selectCountSpan = document.getElementById("select-count");
 
 adminTriggerBtn.addEventListener("click", () => {
   userFlow.classList.add("hidden");
@@ -244,9 +245,17 @@ adminLoginBtn.addEventListener("click", () => {
   }
 });
 
+function updateSelectionUI() {
+  selectCountSpan.innerText = selectedDocIds.size;
+  const cardBoxes = document.querySelectorAll(".card-select-checkbox");
+  selectAllCheckbox.checked = cardBoxes.length > 0 && selectedDocIds.size === cardBoxes.length;
+}
+
 async function loadAdminDashboard() {
   const grid = document.getElementById("friends-list-grid");
   grid.innerHTML = "<p style='color: white;'>Loading passports...</p>";
+  selectedDocIds.clear();
+  updateSelectionUI();
 
   try {
     const snapshot = await db.collection("responses").get();
@@ -259,14 +268,36 @@ async function loadAdminDashboard() {
 
     snapshot.forEach(doc => {
       const data = doc.data();
+      const docId = doc.id;
       const card = document.createElement("div");
       card.className = "friend-summary-card";
+      card.setAttribute("data-id", docId);
+
       card.innerHTML = `
+        <div class="card-checkbox-wrap" onclick="event.stopPropagation()">
+          <input type="checkbox" class="card-select-checkbox" data-id="${docId}">
+        </div>
         <img src="${data.photo}" alt="${data.name}">
         <h3 style="color: var(--text-main); font-size: 1.1rem;">${data.name}</h3>
         <p style="color: var(--text-muted); font-size: 0.85rem;">${data.age} y/o • ${data.birthday}</p>
       `;
-      card.addEventListener("click", () => openDetailModal(data));
+
+      // Open Modal on Card Click
+      card.addEventListener("click", () => openDetailModal(docId, data));
+
+      // Handle Individual Checkbox
+      const checkbox = card.querySelector(".card-select-checkbox");
+      checkbox.addEventListener("change", (e) => {
+        if (e.target.checked) {
+          selectedDocIds.add(docId);
+          card.classList.add("selected-card");
+        } else {
+          selectedDocIds.delete(docId);
+          card.classList.remove("selected-card");
+        }
+        updateSelectionUI();
+      });
+
       grid.appendChild(card);
     });
   } catch (err) {
@@ -274,7 +305,29 @@ async function loadAdminDashboard() {
   }
 }
 
-function openDetailModal(data) {
+// Handle Select All Checkbox
+selectAllCheckbox.addEventListener("change", (e) => {
+  const isChecked = e.target.checked;
+  const checkboxes = document.querySelectorAll(".card-select-checkbox");
+
+  checkboxes.forEach(cb => {
+    cb.checked = isChecked;
+    const docId = cb.getAttribute("data-id");
+    const parentCard = cb.closest(".friend-summary-card");
+
+    if (isChecked) {
+      selectedDocIds.add(docId);
+      parentCard.classList.add("selected-card");
+    } else {
+      selectedDocIds.delete(docId);
+      parentCard.classList.remove("selected-card");
+    }
+  });
+
+  updateSelectionUI();
+});
+
+function openDetailModal(docId, data) {
   const modal = document.getElementById("friend-detail-modal");
   const container = document.getElementById("passport-card-render");
 
@@ -320,11 +373,57 @@ function openDetailModal(data) {
       <div class="answers-scroll-area">
         ${answersHTML}
       </div>
+      <button class="delete-card-btn" onclick="deletePassportCard('${docId}')">
+        <i data-lucide="trash-2"></i> Delete Passport
+      </button>
     </div>
   `;
 
   modal.classList.remove("hidden");
+  lucide.createIcons();
 }
+
+// Single Delete Function
+async function deletePassportCard(docId) {
+  if (confirm("Are you sure you want to delete this response passport?")) {
+    try {
+      await db.collection("responses").doc(docId).delete();
+      closeDetailModal();
+      loadAdminDashboard();
+    } catch (err) {
+      alert("Failed to delete passport: " + err.message);
+    }
+  }
+}
+
+// Delete Selected Batch System
+deleteSelectedBtn.addEventListener("click", async () => {
+  if (selectedDocIds.size === 0) {
+    alert("Please select at least one passport to delete using the checkboxes.");
+    return;
+  }
+
+  const confirmation = confirm(`Are you sure you want to delete the ${selectedDocIds.size} selected passport(s)?`);
+  if (!confirmation) return;
+
+  const grid = document.getElementById("friends-list-grid");
+  grid.innerHTML = "<p style='color: white;'>Deleting selected passports...</p>";
+
+  try {
+    const batch = db.batch();
+    selectedDocIds.forEach(docId => {
+      const docRef = db.collection("responses").doc(docId);
+      batch.delete(docRef);
+    });
+
+    await batch.commit();
+    alert("Selected passports deleted successfully! 🧹");
+    loadAdminDashboard();
+  } catch (err) {
+    alert("Failed to delete selected passports: " + err.message);
+    loadAdminDashboard();
+  }
+});
 
 function closeDetailModal() {
   document.getElementById("friend-detail-modal").classList.add("hidden");

@@ -60,8 +60,8 @@ const level2Questions = [
   { q: "Do you love perfume so much or just a little or?? 🧴", choices: ["Obsessed with it! ✨", "Just a little bit 😊", "Not really into it 🌿"] },
   { q: "Have you ever felt like u want to say smth to me but shy or scared that i might hate u or may be annoyed or smth like that? 💭", choices: ["Yes, sometimes 🙈", "A little bit 🤐", "Never! I feel safe with u ❤️"] },
   { q: "What is your weakness? 🩹", choices: ["Being oversensitive 🥺", "Caring too much 💌", "Overthinking everything 💭"] },
-  { q: "Do you love someone but scared to tell them? (Love them as?) 🙈", choices: ["Yes, as a secret crush 💖", "Yes, as a best friend 🫂", "Nope, open book! ✨"] },
-  { q: "Tell me smth abt urself u wanted to say? 💬", choices: ["I secretly overthink 🤐", "I value our bond a lot 💖", "I get attached easily 🧸"] },
+  { q: "Do you love someone but scared to tell them? (Love them as?) ", choices: ["Yes, as a secret Brother/sister 💖", "Yes, as a best friend 🫂", "Nope, open book! ✨"] },
+  { q: "Tell me smth abt urself u wanted to say? 💬", choices: ["I secretly overthink 🤐", "I value our bond a lot 💖", "I Dont know 😅"] },
   { q: "What is a secret dream you rarely share with anyone? 🌌", choices: ["Becoming famous 🌟", "Living in a cozy countryside 🏡", "Traveling the world alone ✈️"] },
   { q: "What makes you feel truly safe and accepted? 🛡️", choices: ["Deep conversations 💬", "Warm hugs 🫂", "Silence with no judgment 🌙"] }
 ];

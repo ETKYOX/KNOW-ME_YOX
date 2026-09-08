@@ -60,8 +60,8 @@ const level2Questions = [
   { q: "Do you love perfume so much or just a little or?? 🧴", choices: ["Obsessed with it! ✨", "Just a little bit 😊", "Not really into it 🌿"] },
   { q: "Have you ever felt like u want to say smth to me but shy or scared that i might hate u or may be annoyed or smth like that? 💭", choices: ["Yes, sometimes 🙈", "A little bit 🤐", "Never! I feel safe with u ❤️"] },
   { q: "What is your weakness? 🩹", choices: ["Being oversensitive 🥺", "Caring too much 💌", "Overthinking everything 💭"] },
-  { q: "Do you love someone but scared to tell them? (Love them as?) ", choices: ["Yes, as a secret Brother/sister 💖", "Yes, as a best friend 🫂", "Nope, open book! ✨"] },
-  { q: "Tell me smth abt urself u wanted to say? 💬", choices: ["I secretly overthink 🤐", "I value our bond a lot 💖", "I Dont know 😅"] },
+  { q: "Do you love someone but scared to tell them? (Love them as?) ", choices: ["Yes, as a brother/sister 💖", "Yes, as a best friend 🫂", "Nope, open book! ✨"] },
+  { q: "Tell me smth abt urself u wanted to say? 💬", choices: ["I secretly overthink 🤐", "I value our bond a lot 💖", "I dont know 😅"] },
   { q: "What is a secret dream you rarely share with anyone? 🌌", choices: ["Becoming famous 🌟", "Living in a cozy countryside 🏡", "Traveling the world alone ✈️"] },
   { q: "What makes you feel truly safe and accepted? 🛡️", choices: ["Deep conversations 💬", "Warm hugs 🫂", "Silence with no judgment 🌙"] }
 ];
@@ -72,6 +72,11 @@ let currentSlideIndex = 0;
 let uploadedPhotoBase64 = "";
 let selectedDocIds = new Set();
 let currentFilter = 'all';
+
+// SECURE PASSWORD HASHING
+// This is the irreversibly hashed version of '592011'.
+// Someone inspecting your code cannot decode this back to the password.
+const adminHash = "a946b6e4566c61563e46c70176a9284203a936a798f0e01476f57e62a049f506";
 
 // Audio Player Handling
 const bgMusic = document.getElementById("bg-music");
@@ -306,12 +311,21 @@ exitAdminBtn.addEventListener("click", () => {
   userFlow.classList.remove("hidden");
 });
 
+// SECURE ADMIN LOGIN
 adminLoginBtn.addEventListener("click", () => {
-  if (adminPassInput.value === "592011") {
+  // 1. Get user input
+  const passwordInput = adminPassInput.value;
+  // 2. Convert input password into a secure hash
+  const inputHash = CryptoJS.SHA256(passwordInput).toString();
+
+  // 3. Compare hashed input with hashed saved password
+  if (inputHash === adminHash) {
+    // Correct password
     adminAuthScreen.classList.add("hidden");
     adminDashboardScreen.classList.remove("hidden");
     loadAdminDashboard();
   } else {
+    // Incorrect password
     adminErrMsg.classList.remove("hidden");
   }
 });

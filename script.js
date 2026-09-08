@@ -13,8 +13,8 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
-// Questions Data
-const questionsData = [
+// Level 1 Questions (36 Cozy Questions)
+const level1Questions = [
   { q: "What is your absolute comfort food?", choices: ["Ramen 🍜", "Pizza 🍕", "Ice Cream 🍦"] },
   { q: "Favorite song type for rainy days?", choices: ["Lo-Fi Beats 🎧", "Acoustic Pop 🎸", "Classical 🎻"] },
   { q: "What instantly brightens your day?", choices: ["Warm tea ☕", "A nice compliment ✨", "Cute pets 🐱"] },
@@ -53,47 +53,55 @@ const questionsData = [
   { q: "Do you get jealous over your favorite friends?", choices: ["Yes, sometimes! 🤐", "A little bit 🤏", "Not at all 🕊️"] }
 ];
 
+// Level 2 Questions (Deep & Secret)
+const level2Questions = [
+  { q: "What is your fav sweet? Mention 3 or 4 🍬", choices: ["Chocolate 🍫", "Donuts 🍩", "Macarons 🧁"] },
+  { q: "What is your fav letter? 🔤", choices: ["A", "S", "M", "L"] },
+  { q: "Do you love perfume so much or just a little or?? 🧴", choices: ["Obsessed with it! ✨", "Just a little bit 😊", "Not really into it 🌿"] },
+  { q: "Have you ever felt like u want to say smth to me but shy or scared that i might hate u or may be annoyed or smth like that? 💭", choices: ["Yes, sometimes 🙈", "A little bit 🤐", "Never! I feel safe with u ❤️"] },
+  { q: "What is your weakness? 🩹", choices: ["Being oversensitive 🥺", "Caring too much 💌", "Overthinking everything 💭"] },
+  { q: "Do you love someone but scared to tell them? (Love them as?) 🙈", choices: ["Yes, as a secret crush 💖", "Yes, as a best friend 🫂", "Nope, open book! ✨"] },
+  { q: "Tell me smth abt urself u wanted to say? 💬", choices: ["I secretly overthink 🤐", "I value our bond a lot 💖", "I get attached easily 🧸"] },
+  { q: "What is a secret dream you rarely share with anyone? 🌌", choices: ["Becoming famous 🌟", "Living in a cozy countryside 🏡", "Traveling the world alone ✈️"] },
+  { q: "What makes you feel truly safe and accepted? 🛡️", choices: ["Deep conversations 💬", "Warm hugs 🫂", "Silence with no judgment 🌙"] }
+];
+
+let selectedLevel = null;
+let activeQuestions = [];
 let currentSlideIndex = 0;
 let uploadedPhotoBase64 = "";
 let selectedDocIds = new Set();
+let currentFilter = 'all';
 
-// Inject Question Cards
-const slidesWrapper = document.getElementById("slides-wrapper");
+// Audio Player Handling
+const bgMusic = document.getElementById("bg-music");
+const musicToggleBtn = document.getElementById("music-toggle-btn");
+let isPlaying = false;
 
-questionsData.forEach((item, idx) => {
-  const slide = document.createElement("div");
-  slide.className = "slide";
-  slide.setAttribute("data-slide", idx + 1);
+// Auto-play music on first interaction if blocked by browser
+document.body.addEventListener('click', () => {
+  if (!isPlaying) {
+    bgMusic.play().then(() => {
+      isPlaying = true;
+      musicToggleBtn.classList.add("active-music");
+    }).catch(() => {});
+  }
+}, { once: true });
 
-  const pillsHTML = item.choices.map(choice => 
-    `<button type="button" class="option-pill" onclick="selectPreset(${idx}, '${choice}')">${choice}</button>`
-  ).join("");
-
-  slide.innerHTML = `
-    <div class="cozy-card card-slide floating-card">
-      <div class="card-tag">QUESTION ${String(idx + 1).padStart(2, '0')}</div>
-      <h2>${item.q}</h2>
-      <p class="subtitle">Pick a suggestion or type your own response below!</p>
-      <div class="options-wrapper">
-        ${pillsHTML}
-      </div>
-      <div class="input-group">
-        <textarea id="q-ans-${idx}" rows="3" placeholder="Type your answer here..."></textarea>
-      </div>
-    </div>
-  `;
-  slidesWrapper.appendChild(slide);
+musicToggleBtn.addEventListener("click", () => {
+  if (isPlaying) {
+    bgMusic.pause();
+    isPlaying = false;
+    musicToggleBtn.classList.remove("active-music");
+  } else {
+    bgMusic.play().then(() => {
+      isPlaying = true;
+      musicToggleBtn.classList.add("active-music");
+    });
+  }
 });
 
-const totalSlides = questionsData.length + 1;
-lucide.createIcons();
-
-function selectPreset(qIndex, text) {
-  const textarea = document.getElementById(`q-ans-${qIndex}`);
-  textarea.value = text;
-}
-
-// Convert Image File
+// Image Upload
 document.getElementById("user-photo").addEventListener("change", function(e) {
   const file = e.target.files[0];
   if (file) {
@@ -112,14 +120,66 @@ const submitBtn = document.getElementById("submit-btn");
 const slideCounter = document.getElementById("slide-counter");
 const progressFill = document.getElementById("progress-fill");
 
+function selectLevel(lvl) {
+  selectedLevel = lvl;
+  activeQuestions = lvl === 1 ? level1Questions : level2Questions;
+
+  // Clear existing question slides
+  const existingDynamicSlides = document.querySelectorAll('.slide[data-dynamic="true"]');
+  existingDynamicSlides.forEach(s => s.remove());
+
+  const slidesWrapper = document.getElementById("slides-wrapper");
+
+  activeQuestions.forEach((item, idx) => {
+    const slide = document.createElement("div");
+    slide.className = "slide";
+    slide.setAttribute("data-slide", idx + 2);
+    slide.setAttribute("data-dynamic", "true");
+
+    const pillsHTML = item.choices.map(choice => 
+      `<button type="button" class="option-pill" onclick="selectPreset(${idx}, \`${choice}\`)">${choice}</button>`
+    ).join("");
+
+    slide.innerHTML = `
+      <div class="cozy-card card-slide floating-card">
+        <div class="card-tag">LVL 0${lvl} // QUESTION ${String(idx + 1).padStart(2, '0')}</div>
+        <h2>${item.q}</h2>
+        <p class="subtitle">Pick a suggestion or type your own response below!</p>
+        <div class="options-wrapper">
+          ${pillsHTML}
+        </div>
+        <div class="input-group">
+          <textarea id="q-ans-${idx}" rows="3" placeholder="Type your answer here..."></textarea>
+        </div>
+      </div>
+    `;
+    slidesWrapper.appendChild(slide);
+  });
+
+  lucide.createIcons();
+  currentSlideIndex = 2;
+  updateSlideView();
+}
+
+function selectPreset(qIndex, text) {
+  const textarea = document.getElementById(`q-ans-${qIndex}`);
+  textarea.value = text;
+}
+
 function updateSlideView() {
   const allSlides = document.querySelectorAll(".slide");
+  const totalSlides = selectedLevel ? activeQuestions.length + 2 : 2;
+
   allSlides.forEach((slide, idx) => {
     slide.classList.toggle("active-slide", idx === currentSlideIndex);
   });
 
   prevBtn.classList.toggle("hidden", currentSlideIndex === 0);
-  if (currentSlideIndex === totalSlides - 1) {
+
+  // Hide Next Button on Level Pick Slide (Slide 1)
+  if (currentSlideIndex === 1) {
+    nextBtn.classList.add("hidden");
+  } else if (currentSlideIndex === totalSlides - 1 && selectedLevel) {
     nextBtn.classList.add("hidden");
     submitBtn.classList.remove("hidden");
   } else {
@@ -147,24 +207,36 @@ function validateCurrentSlide() {
       }
     });
     return valid;
-  } else {
-    const qIdx = currentSlideIndex - 1;
+  } else if (currentSlideIndex >= 2) {
+    const qIdx = currentSlideIndex - 2;
     const ansEl = document.getElementById(`q-ans-${qIdx}`);
     if (!ansEl.value.trim()) {
       ansEl.classList.add("input-error");
       setTimeout(() => ansEl.classList.remove("input-error"), 1000);
       return false;
     }
-    return true;
   }
+  return true;
 }
 
+// Next Button Handler with Promise Popup Trigger for Level 2 Question 4
 nextBtn.addEventListener("click", () => {
   if (!validateCurrentSlide()) return;
-  if (currentSlideIndex < totalSlides - 1) {
-    currentSlideIndex++;
-    updateSlideView();
+
+  // Trigger Promise Modal on Level 2, Question 4 (Slide Index 5)
+  if (selectedLevel === 2 && currentSlideIndex === 5) {
+    document.getElementById("promise-modal").classList.remove("hidden");
+    return;
   }
+
+  currentSlideIndex++;
+  updateSlideView();
+});
+
+document.getElementById("promise-btn").addEventListener("click", () => {
+  document.getElementById("promise-modal").classList.add("hidden");
+  currentSlideIndex++;
+  updateSlideView();
 });
 
 prevBtn.addEventListener("click", () => {
@@ -174,13 +246,13 @@ prevBtn.addEventListener("click", () => {
   }
 });
 
-// Instant Popup Submission
+// Final Submission
 submitBtn.addEventListener("click", () => {
   if (!validateCurrentSlide()) return;
 
   document.getElementById("success-modal").classList.remove("hidden");
 
-  const answersArr = questionsData.map((item, idx) => ({
+  const answersArr = activeQuestions.map((item, idx) => ({
     question: item.q,
     answer: document.getElementById(`q-ans-${idx}`).value
   }));
@@ -190,13 +262,12 @@ submitBtn.addEventListener("click", () => {
     age: document.getElementById("user-age").value,
     birthday: document.getElementById("user-bday").value,
     photo: uploadedPhotoBase64 || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150",
+    level: `Level ${selectedLevel}`,
     answers: answersArr,
     createdAt: new Date().toISOString()
   };
 
-  db.collection("responses").add(payload).catch(err => {
-    console.error("Upload error:", err);
-  });
+  db.collection("responses").add(payload).catch(err => console.error("Upload error:", err));
 });
 
 function closeSuccessModal() {
@@ -207,7 +278,7 @@ function resetAppView() {
   location.reload();
 }
 
-// Admin Logic
+// Admin Panel Logic
 const adminTriggerBtn = document.getElementById("admin-trigger-btn");
 const userFlow = document.getElementById("user-flow");
 const adminView = document.getElementById("admin-view");
@@ -245,6 +316,14 @@ adminLoginBtn.addEventListener("click", () => {
   }
 });
 
+function filterPassports(lvl) {
+  currentFilter = lvl;
+  document.querySelectorAll(".filter-pill").forEach(p => {
+    p.classList.toggle("active", p.innerText === lvl || (lvl === 'all' && p.innerText === 'All'));
+  });
+  loadAdminDashboard();
+}
+
 function updateSelectionUI() {
   selectCountSpan.innerText = selectedDocIds.size;
   const cardBoxes = document.querySelectorAll(".card-select-checkbox");
@@ -269,23 +348,28 @@ async function loadAdminDashboard() {
     snapshot.forEach(doc => {
       const data = doc.data();
       const docId = doc.id;
+      const docLvl = data.level || "Level 1";
+
+      if (currentFilter !== 'all' && docLvl !== currentFilter) return;
+
       const card = document.createElement("div");
       card.className = "friend-summary-card";
       card.setAttribute("data-id", docId);
 
+      const lvlBadgeClass = docLvl === 'Level 2' ? 'card-level-badge lvl2-badge' : 'card-level-badge';
+
       card.innerHTML = `
+        <div class="${lvlBadgeClass}">${docLvl}</div>
         <div class="card-checkbox-wrap" onclick="event.stopPropagation()">
           <input type="checkbox" class="card-select-checkbox" data-id="${docId}">
         </div>
         <img src="${data.photo}" alt="${data.name}">
-        <h3 style="color: var(--text-main); font-size: 1.1rem;">${data.name}</h3>
-        <p style="color: var(--text-muted); font-size: 0.85rem;">${data.age} y/o • ${data.birthday}</p>
+        <h3 style="color: var(--text-main); font-size: 1.05rem;">${data.name}</h3>
+        <p style="color: var(--text-muted); font-size: 0.8rem;">${data.age} y/o • ${data.birthday}</p>
       `;
 
-      // Open Modal on Card Click
       card.addEventListener("click", () => openDetailModal(docId, data));
 
-      // Handle Individual Checkbox
       const checkbox = card.querySelector(".card-select-checkbox");
       checkbox.addEventListener("change", (e) => {
         if (e.target.checked) {
@@ -305,7 +389,6 @@ async function loadAdminDashboard() {
   }
 }
 
-// Handle Select All Checkbox
 selectAllCheckbox.addEventListener("change", (e) => {
   const isChecked = e.target.checked;
   const checkboxes = document.querySelectorAll(".card-select-checkbox");
@@ -332,27 +415,13 @@ function openDetailModal(docId, data) {
   const container = document.getElementById("passport-card-render");
 
   let answersHTML = "";
-
   if (Array.isArray(data.answers)) {
-    answersHTML = data.answers.map(item => {
-      const qText = item.question || item.q || "Question";
-      const aText = item.answer || item.a || "No answer";
-      return `
-        <div class="passport-q-item">
-          <strong>${qText}</strong>
-          <span>${aText}</span>
-        </div>
-      `;
-    }).join("");
-  } else if (typeof data.answers === "object" && data.answers !== null) {
-    answersHTML = Object.entries(data.answers).map(([key, val]) => `
+    answersHTML = data.answers.map(item => `
       <div class="passport-q-item">
-        <strong>${key}</strong>
-        <span>${val}</span>
+        <strong>${item.question || 'Question'}</strong>
+        <span>${item.answer || 'No answer'}</span>
       </div>
     `).join("");
-  } else {
-    answersHTML = "<p>No recorded answers available.</p>";
   }
 
   container.innerHTML = `
@@ -360,7 +429,7 @@ function openDetailModal(docId, data) {
       <button class="close-modal-btn" onclick="closeDetailModal()">&times;</button>
       <div class="passport-header">
         <span>PASSPORT // KNOW ME</span>
-        <span>LVL 1</span>
+        <span class="level-tag-badge">${data.level || 'Level 1'}</span>
       </div>
       <div class="passport-body">
         <img src="${data.photo}" class="passport-avatar" alt="Avatar">
@@ -383,7 +452,6 @@ function openDetailModal(docId, data) {
   lucide.createIcons();
 }
 
-// Single Delete Function
 async function deletePassportCard(docId) {
   if (confirm("Are you sure you want to delete this response passport?")) {
     try {
@@ -396,32 +464,24 @@ async function deletePassportCard(docId) {
   }
 }
 
-// Delete Selected Batch System
 deleteSelectedBtn.addEventListener("click", async () => {
   if (selectedDocIds.size === 0) {
     alert("Please select at least one passport to delete using the checkboxes.");
     return;
   }
 
-  const confirmation = confirm(`Are you sure you want to delete the ${selectedDocIds.size} selected passport(s)?`);
-  if (!confirmation) return;
-
-  const grid = document.getElementById("friends-list-grid");
-  grid.innerHTML = "<p style='color: white;'>Deleting selected passports...</p>";
+  if (!confirm(`Delete ${selectedDocIds.size} selected passport(s)?`)) return;
 
   try {
     const batch = db.batch();
     selectedDocIds.forEach(docId => {
-      const docRef = db.collection("responses").doc(docId);
-      batch.delete(docRef);
+      batch.delete(db.collection("responses").doc(docId));
     });
 
     await batch.commit();
-    alert("Selected passports deleted successfully! 🧹");
     loadAdminDashboard();
   } catch (err) {
-    alert("Failed to delete selected passports: " + err.message);
-    loadAdminDashboard();
+    alert("Failed to delete passports: " + err.message);
   }
 });
 
